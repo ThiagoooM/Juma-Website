@@ -13,4 +13,8 @@ urlpatterns = [
     # 🔒 Secciones de administración (solo admin)
     path('admin/crear/', views.crear_producto, name='crear_producto'),
     path('admin/editar/<int:pk>/', views.editar_producto, name='editar_producto'),
+
+        # Login / perfil
+    path('register/', views.register, name='register'),
+    path('profile/', views.profile, name='profile'),
 ]

@@ -6,6 +6,7 @@ from django.views.generic import ListView, DetailView
 from .models import Producto, Carrito, ItemCarrito
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import ProductoForm
+from django.contrib.auth.forms import UserCreationForm
 
 
 # 🟢 LISTADO DE PRODUCTOS
@@ -123,3 +124,18 @@ def editar_producto(request, pk):
         form = ProductoForm(instance=producto)
 
     return render(request, 'productos/editar_producto.html', {'form': form, 'producto': producto})
+
+def register(request):
+    if request.method == 'POST':
+        form = UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('login')
+    else:
+        form = UserCreationForm()
+    return render(request, 'registration/register.html', {'form': form})
+
+
+@login_required
+def profile(request):
+    return render(request, 'registration/profile.html')
