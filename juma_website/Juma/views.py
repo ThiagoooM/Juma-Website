@@ -1,12 +1,13 @@
-from django.shortcuts import render
 import os
 from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
-from .models import Producto, Carrito, ItemCarrito
 from django.contrib.auth.decorators import login_required, user_passes_test
-from .forms import ProductoForm
+from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
+from .models import Producto, Carrito, ItemCarrito
+from .forms import EditarPerfilForm, ProductoForm
+from django.contrib.auth import logout
 
 
 # 🟢 LISTADO DE PRODUCTOS
@@ -23,6 +24,7 @@ class ProductoDetailView(DetailView):
     context_object_name = 'producto'
 
 
+# 🛒 AGREGAR AL CARRITO
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
 
@@ -85,22 +87,20 @@ def vaciar_carrito(request):
     return redirect('ver_carrito')
 
 
-
-# 🔒 Solo el usuario admin puede acceder
+# 🔒 Verifica si el usuario es administrador
 def es_admin(user):
     return user.is_staff or user.is_superuser
 
 
+# 🧱 CREAR PRODUCTO (solo admin)
 @login_required
 @user_passes_test(es_admin)
 def crear_producto(request):
-    """
-    Permite al usuario administrador agregar nuevos productos desde la web.
-    """
     if request.method == 'POST':
         form = ProductoForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Producto agregado correctamente.')
             return redirect('lista_productos')
     else:
         form = ProductoForm()
@@ -108,34 +108,61 @@ def crear_producto(request):
     return render(request, 'productos/crear_producto.html', {'form': form})
 
 
+# ✏️ EDITAR PRODUCTO (solo admin)
 @login_required
 @user_passes_test(es_admin)
 def editar_producto(request, pk):
-    """
-    Permite editar productos existentes.
-    """
     producto = get_object_or_404(Producto, pk=pk)
     if request.method == 'POST':
         form = ProductoForm(request.POST, instance=producto)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Producto editado correctamente.')
             return redirect('lista_productos')
     else:
         form = ProductoForm(instance=producto)
 
     return render(request, 'productos/editar_producto.html', {'form': form, 'producto': producto})
 
+
+# 🧍 REGISTRO DE USUARIOS
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
         if form.is_valid():
             form.save()
+            messages.success(request, 'Cuenta creada con éxito. Ahora puedes iniciar sesión.')
             return redirect('login')
     else:
         form = UserCreationForm()
     return render(request, 'registration/register.html', {'form': form})
 
 
+# 👤 PERFIL DE USUARIO
 @login_required
 def profile(request):
     return render(request, 'registration/profile.html')
+
+
+# ⚙️ EDITAR PERFIL
+@login_required
+def editar_perfil(request):
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Tu perfil fue actualizado correctamente.')
+            return redirect('profile')
+    else:
+        form = EditarPerfilForm(instance=request.user)
+
+    return render(request, 'registration/editar_perfil.html', {'form': form})
+
+
+def logout_view(request):
+    """
+    Cierra la sesión del usuario y redirige al login.
+    """
+    logout(request)  # 🔐 elimina la sesión del usuario
+    messages.success(request, "Sesión cerrada correctamente.")
+    return redirect('login')

@@ -17,4 +17,6 @@ urlpatterns = [
         # Login / perfil
     path('register/', views.register, name='register'),
     path('profile/', views.profile, name='profile'),
+    path('editar-perfil/', views.editar_perfil, name='editar_perfil'),
+
 ]

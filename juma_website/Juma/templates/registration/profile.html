@@ -8,6 +8,7 @@
             <p><strong>Nombre:</strong> {{ user.first_name }}</p>
             <p><strong>Apellido:</strong> {{ user.last_name }}</p>
             <p><strong>Email:</strong> {{ user.email }}</p>
+            <a href="{% url 'editar_perfil' %}" class="btn btn-dark">Editar perfil</a>
             <a href="{% url 'logout' %}" class="btn btn-dark">Cerrar sesión</a>
         </div>
     </div>
