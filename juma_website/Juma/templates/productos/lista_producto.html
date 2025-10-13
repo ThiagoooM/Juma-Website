@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% block title %}Productos{% endblock %}
+{% block content %}
+
+<h2 class="mb-4 text-center">Catálogo de productos</h2>
+
+<div class="row g-4">
+    {% for producto in productos %}
+    <div class="col-md-4 col-lg-3">
+        <div class="card h-100 shadow-sm">
+            {% if producto.imagenes.first %}
+                <img src="{{ producto.imagenes.first.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}">
+            {% else %}
+                <img src="https://via.placeholder.com/300x200?text=Sin+imagen" class="card-img-top" alt="sin imagen">
+            {% endif %}
+            <div class="card-body text-center">
+                <h5 class="card-title">{{ producto.nombre }}</h5>
+                <p class="text-muted">${{ producto.precio_venta }}</p>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'detalle_producto' producto.id %}" class="btn btn-outline-secondary btn-sm">Ver detalles</a>
+                    <a href="{% url 'agregar_al_carrito' producto.id %}" class="btn btn-primary btn-sm">Agregar al carrito</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <p class="text-center">No hay productos disponibles.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

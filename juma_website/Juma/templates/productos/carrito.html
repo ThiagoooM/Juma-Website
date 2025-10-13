@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Tu carrito{% endblock %}
+{% block content %}
+
+<h2 class="mb-4 text-center">🧺 Tu carrito de compras</h2>
+
+{% if items %}
+<table class="table table-bordered align-middle">
+    <thead class="table-dark">
+        <tr>
+            <th>Producto</th>
+            <th>Precio</th>
+            <th>Cantidad</th>
+            <th>Subtotal</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in items %}
+            <tr>
+                {% if item.producto %}
+                    <td>{{ item.producto.nombre }}</td>
+                    <td>${{ item.producto.precio_venta }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ item.subtotal }}</td>
+                {% else %}
+                    <td>{{ item.nombre }}</td>
+                    <td>${{ item.precio }}</td>
+                    <td>{{ item.cantidad }}</td>
+                    <td>${{ item.precio|floatformat:2|add:item.cantidad }}</td>
+                {% endif %}
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<div class="text-end">
+    <h4 class="mb-3">Total: <strong>${{ total }}</strong></h4>
+    <a href="{% url 'vaciar_carrito' %}" class="btn btn-danger">Vaciar carrito</a>
+</div>
+
+{% else %}
+<p class="text-center">Tu carrito está vacío 😔</p>
+{% endif %}
+
+{% endblock %}
