@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Producto, ImagenProducto, Carrito, ItemCarrito
+from .models import Categoria, Producto, ImagenProducto, Carrito, ItemCarrito
 
 
 class ImagenProductoInline(admin.TabularInline):  # o StackedInline si querés en columnas
@@ -7,14 +7,17 @@ class ImagenProductoInline(admin.TabularInline):  # o StackedInline si querés e
     extra = 1  # cantidad de formularios vacíos listos para cargar
 
 
+@admin.register(Categoria)
+class CategoriaAdmin(admin.ModelAdmin):
+    list_display = ('nombre', 'categoria_padre')
+    search_fields = ('nombre',)
+    list_filter = ('categoria_padre',)
+
 @admin.register(Producto)
 class ProductoAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'precio_venta', 'stock')
+    list_display = ('nombre', 'categoria', 'precio_venta', 'stock')
+    list_filter = ('categoria',)
     search_fields = ('nombre',)
-    list_filter = ('precio_venta',)
-    ordering = ('nombre',)
-    inlines = [ImagenProductoInline]  # 👈 esta línea es la clave
-
 
 @admin.register(ImagenProducto)
 class ImagenProductoAdmin(admin.ModelAdmin):

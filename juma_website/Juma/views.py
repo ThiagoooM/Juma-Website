@@ -5,17 +5,37 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Producto, Carrito, ItemCarrito
+from .models import Categoria, Producto, Carrito, ItemCarrito
 from .forms import EditarPerfilForm, ProductoForm
 from django.contrib.auth import logout
 
 
-# 🟢 LISTADO DE PRODUCTOS
 class ProductoListView(ListView):
     model = Producto
     template_name = 'productos/lista_productos.html'
     context_object_name = 'productos'
 
+    def get_queryset(self):
+        queryset = Producto.objects.all()
+        categoria_id = self.request.GET.get('categoria')
+
+        if categoria_id:
+            # Si seleccionamos una categoría, buscamos sus subcategorías también
+            categoria = Categoria.objects.get(id=categoria_id)
+            subcategorias = categoria.subcategorias.all()
+            
+            if subcategorias.exists():
+                queryset = queryset.filter(categoria__in=subcategorias)
+            else:
+                queryset = queryset.filter(categoria=categoria)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = Categoria.objects.filter(categoria_padre__isnull=True)
+        context['categoria_seleccionada'] = self.request.GET.get('categoria')
+        return context
 
 # 🟠 DETALLE DE PRODUCTO
 class ProductoDetailView(DetailView):
