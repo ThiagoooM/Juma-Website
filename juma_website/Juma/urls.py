@@ -19,4 +19,9 @@ urlpatterns = [
     path('profile/', views.profile, name='profile'),
     path('editar-perfil/', views.editar_perfil, name='editar_perfil'),
 
+        # Finalizar pedido
+    path('finalizar-compra/', views.finalizar_compra, name='finalizar_compra'),
+    path('pedido/<int:pedido_id>/', views.detalle_pedido, name='detalle_pedido'),
+
+
 ]

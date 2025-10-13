@@ -1,41 +1,51 @@
 {% extends 'base.html' %}
 {% block title %}Carrito - Juma Joyas{% endblock %}
+
 {% block content %}
-<h2 class="mb-4 text-center">🛒 Tu carrito</h2>
+<div class="container mt-4">
+    <h2 class="mb-4 text-center">🛒 Tu carrito</h2>
 
-{% if items %}
-<table class="table table-striped text-center align-middle">
-    <thead>
-        <tr>
-            <th>Producto</th>
-            <th>Cantidad</th>
-            <th>Subtotal</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for item in items %}
-            <tr>
-                {% if item.producto %}
-                    <td>{{ item.producto.nombre }}</td>
-                    <td>{{ item.cantidad }}</td>
-                    <td>${{ item.subtotal }}</td>
-                {% else %}
-                    <td>{{ item.nombre }}</td>
-                    <td>{{ item.cantidad }}</td>
-                    <td>${{ item.precio|floatformat:2 }}</td>
-                {% endif %}
-            </tr>
-        {% endfor %}
-    </tbody>
-</table>
-<h4 class="text-end">Total: ${{ total|floatformat:2 }}</h4>
+    {% if items %}
+        <table class="table table-striped text-center align-middle shadow-sm">
+            <thead class="table-dark">
+                <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Subtotal</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                    <tr>
+                        {% if item.producto %}
+                            <td>{{ item.producto.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>${{ item.subtotal|floatformat:2 }}</td>
+                        {% else %}
+                            <td>{{ item.nombre }}</td>
+                            <td>{{ item.cantidad }}</td>
+                            <td>${{ item.precio|floatformat:2 }}</td>
+                        {% endif %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
 
-<div class="text-center mt-4">
-    <a href="{% url 'vaciar_carrito' %}" class="btn btn-danger">Vaciar carrito</a>
-    <a href="{% url 'lista_productos' %}" class="btn btn-secondary">Seguir comprando</a>
+        <div class="text-end mt-3">
+            <h4>Total: <strong>${{ total|floatformat:2 }}</strong></h4>
+        </div>
+
+        <div class="d-flex justify-content-center gap-3 mt-4 flex-wrap">
+            <a href="{% url 'vaciar_carrito' %}" class="btn btn-danger px-4">🗑️ Vaciar carrito</a>
+            <a href="{% url 'lista_productos' %}" class="btn btn-secondary px-4">↩️ Seguir comprando</a>
+            <a href="{% url 'finalizar_compra' %}" class="btn btn-success px-4">✅ Finalizar compra</a>
+        </div>
+
+    {% else %}
+        <p class="text-center fs-5 text-muted mt-4">Tu carrito está vacío 😢</p>
+        <div class="text-center mt-3">
+            <a href="{% url 'lista_productos' %}" class="btn btn-dark px-4">Ver productos</a>
+        </div>
+    {% endif %}
 </div>
-{% else %}
-<p class="text-center">Tu carrito está vacío 😢</p>
-<a href="{% url 'lista_productos' %}" class="btn btn-dark d-block mx-auto" style="width: fit-content;">Ver productos</a>
-{% endif %}
 {% endblock %}

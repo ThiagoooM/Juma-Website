@@ -5,9 +5,10 @@ from django.views.generic import ListView, DetailView
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib import messages
 from django.contrib.auth.forms import UserCreationForm
-from .models import Categoria, Producto, Carrito, ItemCarrito
+from .models import Categoria, Producto, Carrito, ItemCarrito, Pedido, DetallePedido
 from .forms import EditarPerfilForm, ProductoForm
 from django.contrib.auth import logout
+from django.utils import timezone
 
 
 class ProductoListView(ListView):
@@ -189,3 +190,73 @@ def logout_view(request):
     logout(request)  # 🔐 destruye la sesión
     messages.success(request, "Sesión cerrada correctamente.")
     return render(request, 'registration/logout_page.html')
+
+
+
+def finalizar_compra(request):
+    # --- Caso: usuario autenticado ---
+    if request.user.is_authenticated:
+        carrito = Carrito.objects.filter(usuario=request.user, activo=True).first()
+        if not carrito or not carrito.items.exists():
+            messages.warning(request, "Tu carrito está vacío.")
+            return redirect('ver_carrito')
+
+        # Crear el pedido en base de datos
+        pedido = Pedido.objects.create(
+            usuario=request.user,
+            total=carrito.total(),
+            estado='Pendiente'
+        )
+
+        # Crear detalles
+        for item in carrito.items.all():
+            DetallePedido.objects.create(
+                pedido=pedido,
+                producto=item.producto,
+                cantidad=item.cantidad,
+                precio_unitario=item.producto.precio_venta,
+                subtotal=item.subtotal()
+            )
+
+        # Vaciar carrito
+        carrito.items.all().delete()
+        carrito.activo = False
+        carrito.save()
+
+        messages.success(request, f"Compra registrada con éxito. Pedido #{pedido.id}")
+        return redirect('detalle_pedido', pedido_id=pedido.id)
+
+    # --- Caso: usuario anónimo ---
+    carrito = request.session.get('carrito', {})
+    if not carrito:
+        messages.warning(request, "Tu carrito está vacío.")
+        return redirect('ver_carrito')
+
+    # Generar datos temporales
+    productos_temporales = []
+    total = 0
+
+    for pid, item in carrito.items():
+        subtotal = item['precio'] * item['cantidad']
+        total += subtotal
+        productos_temporales.append({
+            'nombre': item['nombre'],
+            'cantidad': item['cantidad'],
+            'precio': item['precio'],
+            'subtotal': subtotal,
+        })
+
+    # Limpiar el carrito de sesión
+    request.session['carrito'] = {}
+    request.session.modified = True
+
+    return render(request, 'productos/compra_sin_registro.html', {
+        'productos': productos_temporales,
+        'total': total,
+        'fecha': timezone.now(),
+    })
+
+@login_required
+def detalle_pedido(request, pedido_id):
+    pedido = get_object_or_404(Pedido, id=pedido_id, usuario=request.user)
+    return render(request, 'productos/detalle_pedido.html', {'pedido': pedido})
