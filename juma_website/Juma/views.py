@@ -159,10 +159,13 @@ def editar_perfil(request):
     return render(request, 'registration/editar_perfil.html', {'form': form})
 
 
+from django.contrib.auth import logout
+from django.contrib import messages
+
 def logout_view(request):
     """
-    Cierra la sesión del usuario y redirige al login.
+    Cierra la sesión del usuario y muestra una pantalla de despedida elegante.
     """
-    logout(request)  # 🔐 elimina la sesión del usuario
+    logout(request)  # 🔐 destruye la sesión
     messages.success(request, "Sesión cerrada correctamente.")
-    return redirect('login')
+    return render(request, 'registration/logout_page.html')
