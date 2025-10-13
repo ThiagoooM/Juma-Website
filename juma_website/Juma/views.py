@@ -4,6 +4,8 @@ from django.conf import settings
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView, DetailView
 from .models import Producto, Carrito, ItemCarrito
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .forms import ProductoForm
 
 
 # 🟢 LISTADO DE PRODUCTOS
@@ -20,7 +22,6 @@ class ProductoDetailView(DetailView):
     context_object_name = 'producto'
 
 
-# 🛒 AGREGAR AL CARRITO
 def agregar_al_carrito(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
 
@@ -32,11 +33,8 @@ def agregar_al_carrito(request, producto_id):
             item.cantidad += 1
         item.save()
 
-        # Crear historial en txt
-        historial_path = os.path.join(settings.BASE_DIR, 'historial_carritos')
-        os.makedirs(historial_path, exist_ok=True)
-        archivo = os.path.join(historial_path, f'{request.user.username}_carrito.txt')
-
+        # Guardar historial en la carpeta Juma/historial_carritos
+        archivo = os.path.join(settings.HISTORIAL_DIR, f'{request.user.username}_carrito.txt')
         with open(archivo, 'a', encoding='utf-8') as f:
             f.write(f'Producto agregado: {producto.nombre} (${producto.precio_venta})\n')
 
@@ -84,3 +82,44 @@ def vaciar_carrito(request):
         request.session['carrito'] = {}
         request.session.modified = True
     return redirect('ver_carrito')
+
+
+
+# 🔒 Solo el usuario admin puede acceder
+def es_admin(user):
+    return user.is_staff or user.is_superuser
+
+
+@login_required
+@user_passes_test(es_admin)
+def crear_producto(request):
+    """
+    Permite al usuario administrador agregar nuevos productos desde la web.
+    """
+    if request.method == 'POST':
+        form = ProductoForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_productos')
+    else:
+        form = ProductoForm()
+
+    return render(request, 'productos/crear_producto.html', {'form': form})
+
+
+@login_required
+@user_passes_test(es_admin)
+def editar_producto(request, pk):
+    """
+    Permite editar productos existentes.
+    """
+    producto = get_object_or_404(Producto, pk=pk)
+    if request.method == 'POST':
+        form = ProductoForm(request.POST, instance=producto)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_productos')
+    else:
+        form = ProductoForm(instance=producto)
+
+    return render(request, 'productos/editar_producto.html', {'form': form, 'producto': producto})

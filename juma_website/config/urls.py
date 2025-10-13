@@ -14,7 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.urls import path
+from django.urls import path, include
 from Juma.views import (
     ProductoListView,
     ProductoDetailView,
@@ -24,10 +24,13 @@ from Juma.views import (
 )
 
 
+
+from django.contrib import admin
+from django.urls import path, include
+
 urlpatterns = [
-    path('', ProductoListView.as_view(), name='lista_productos'),
-    path('producto/<int:pk>/', ProductoDetailView.as_view(), name='detalle_producto'),
-    path('agregar/<int:producto_id>/', agregar_al_carrito, name='agregar_al_carrito'),
-    path('carrito/', ver_carrito, name='ver_carrito'),
-    path('vaciar/', vaciar_carrito, name='vaciar_carrito'),
+    path('admin/', admin.site.urls),
+    path('', include('Juma.urls')),  # 👈 importante que coincida el nombre de la carpeta
 ]
+
+
