@@ -47,7 +47,7 @@ class DireccionEnvio(models.Model):
     def __str__(self): return f"{self.calle} {self.numero}, {self.ciudad}"
 
 class Pedido(models.Model):
-    usuario = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name="pedidos")
+    usuario = models.ForeignKey(User, on_delete=models.CASCADE, related_name="pedidos")
     creado_en = models.DateTimeField(auto_now_add=True)
     actualizado_en = models.DateTimeField(auto_now=True)
     metodo_envio = models.CharField(max_length=10, choices=MetodoEnvio.choices, default=MetodoEnvio.RETIRO)

@@ -1,0 +1,39 @@
+<h2>Detalle del pedido #{{ pedido.id }}</h2>
+<p><strong>Fecha:</strong> {{ pedido.creado_en|date:"d/m/Y H:i" }}</p>
+<p><strong>Método de envío:</strong> {{ pedido.get_metodo_envio_display }}</p>
+<p><strong>Estado:</strong> {{ pedido.get_estado_display }}</p>
+<p><strong>Total:</strong> ${{ pedido.total }}</p>
+
+{% if pedido.metodo_envio == "envio" and pedido.direccion_envio %}
+  <p><strong>Dirección:</strong> {{ pedido.direccion_envio }}</p>
+{% endif %}
+
+<hr>
+
+<h3>Productos del pedido</h3>
+{% if items %}
+  <table>
+    <thead>
+      <tr>
+        <th>Producto</th>
+        <th>Cantidad</th>
+        <th>Precio unitario</th>
+        <th>Subtotal</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in items %}
+        <tr>
+          <td>{{ item.producto.nombre }}</td>
+          <td>{{ item.cantidad }}</td>
+          <td>${{ item.precio_unitario }}</td>
+          <td>${{ item.subtotal }}</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No hay productos en este pedido.</p>
+{% endif %}
+
+<a href="{% url 'mis_pedidos' %}">⬅ Volver al historial</a>

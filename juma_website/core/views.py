@@ -98,12 +98,19 @@ def mis_pedidos(request):
 def checkout(request):
     cart = Cart(request)
     if len(cart) == 0:
-        messages.warning(request, "Tu carrito está vacío."); return redirect("catalogo")
+        messages.warning(request, "Tu carrito está vacío.")
+        return redirect("catalogo")
+
     if request.method == "POST":
         form = CheckoutForm(request.POST)
         if form.is_valid():
+            if not request.user.is_authenticated:
+                messages.error(request, "Debes iniciar sesión para continuar.")
+                return redirect("login")
+
             metodo = form.cleaned_data["metodo_envio"]
             pedido = Pedido.objects.create(usuario=request.user, metodo_envio=metodo)
+
             if metodo == "envio":
                 direccion = DireccionEnvio.objects.create(
                     usuario=request.user,
@@ -120,20 +127,48 @@ def checkout(request):
                 pedido.nombre_receptor = form.cleaned_data["nombre"]
                 pedido.telefono_receptor = form.cleaned_data["telefono"]
                 pedido.save()
+
             total = Decimal("0.00")
             for item in cart:
-                ItemPedido.objects.create(pedido=pedido, producto=item["product"], cantidad=item["quantity"], precio_unitario=item["price"], subtotal=item["subtotal"])
+                ItemPedido.objects.create(
+                    pedido=pedido,
+                    producto=item["product"],
+                    cantidad=item["quantity"],
+                    precio_unitario=item["price"],
+                    subtotal=item["subtotal"]
+                )
                 total += item["subtotal"]
-            pedido.total = total; pedido.save()
+
+            pedido.total = total
+            pedido.save()
+
             for item in cart:
-                p = item["product"]; p.stock = max(0, p.stock - item["quantity"]); p.save()
-            cart.clear(); messages.success(request, "¡Pedido creado!")
+                p = item["product"]
+                p.stock = max(0, p.stock - item["quantity"])
+                p.save()
+
+            cart.clear()
+            messages.success(request, "¡Pedido creado exitosamente!")
             return redirect("checkout_exito", pedido_id=pedido.id)
     else:
         form = CheckoutForm(initial={"metodo_envio": "retiro"})
-    return render(request, "core/checkout.html", {"form": form, "cart": list(cart), "total": cart.get_total_price()})
+
+    return render(request, "core/checkout.html", {
+        "form": form,
+        "cart": list(cart),
+        "total": cart.get_total_price(),
+    })
 
 @login_required
 def checkout_exito(request, pedido_id):
     pedido = get_object_or_404(Pedido, id=pedido_id, usuario=request.user)
     return render(request, "core/checkout_success.html", {"pedido": pedido})
+
+@login_required
+def pedido_detalle(request, pedido_id):
+    pedido = get_object_or_404(Pedido, id=pedido_id, usuario=request.user)
+    items = pedido.items.select_related('producto')  # evita consultas repetidas
+    return render(request, "core/pedido_detalle.html", {
+        "pedido": pedido,
+        "items": items,
+    })
