@@ -1,0 +1,30 @@
+# --- Núcleo del proyecto Django ---
+Django==5.2.7
+asgiref==3.9.1
+sqlparse==0.5.3
+tzdata==2025.2
+
+# --- Panel administrativo moderno (interfaz limpia y mejorada) ---
+django-unfold==0.66.0
+
+# --- Archivos multimedia e imágenes ---
+Pillow==10.4.0
+
+# --- Extensiones útiles para desarrollo Django ---
+django-extensions==3.2.3          # comandos extra (shell_plus, show_urls, etc.)
+django-crispy-forms==2.3          # mejora la apariencia de formularios
+crispy-bootstrap5==2024.2         # estilos Bootstrap 5 para formularios
+
+# --- Manejo de entornos y variables ---
+python-dotenv==1.0.1              # para gestionar variables .env (como SECRET_KEY, DEBUG, DB)
+
+# --- Base de datos (SQLite por defecto, pero listo para PostgreSQL si querés migrar) ---
+psycopg2-binary==2.9.9            # conector PostgreSQL (opcional, no necesario en SQLite)
+
+# --- Seguridad y autenticación avanzada ---
+django-allauth==0.63.3            # registro e inicio de sesión social (Google, GitHub, etc.)
+django-widget-tweaks==1.5.0       # personalizar inputs fácilmente en templates
+
+# --- Utilidades opcionales (recomendadas para proyectos medianos/grandes) ---
+django-debug-toolbar==4.4.6       # para depurar consultas SQL y rendimiento
+django-filter==24.3               # para crear filtros en listados (por ejemplo, catálogo)
