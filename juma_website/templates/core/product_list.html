@@ -1,0 +1,33 @@
+
+{% extends "core/base.html" %}
+{% block content %}
+<h2>Catálogo</h2>
+<form method="get" class="row g-2 mb-3">
+  <div class="col-md-4"><input type="text" name="q" class="form-control" placeholder="Buscar..." value="{{ request.GET.q }}"></div>
+  <div class="col-md-3">
+    <select name="cat" class="form-select">
+      <option value="">Todas las categorías</option>
+      {% for c in categorias %}
+        <option value="{{ c.slug }}" {% if request.GET.cat == c.slug %}selected{% endif %}>{{ c.nombre }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2"><button class="btn btn-outline-primary w-100">Filtrar</button></div>
+</form>
+<div class="row row-cols-1 row-cols-md-4 g-3">
+  {% for p in productos %}
+  <div class="col">
+    <div class="card h-100">
+      {% if p.imagen %}<img src="{{ p.imagen.url }}" class="card-img-top" alt="{{ p.nombre }}">{% endif %}
+      <div class="card-body">
+        <h5 class="card-title">{{ p.nombre }}</h5>
+        <p class="card-text small text-muted">{{ p.categoria }}</p>
+        <p class="fw-bold">$ {{ p.precio }}</p>
+        <a href="{% url 'producto_detalle' slug=p.slug %}" class="btn btn-sm btn-outline-secondary">Ver</a>
+        <a href="{% url 'carrito_agregar' pk=p.id %}" class="btn btn-sm btn-primary">Agregar</a>
+      </div>
+    </div>
+  </div>
+  {% empty %}<p>No hay productos.</p>{% endfor %}
+</div>
+{% endblock %}

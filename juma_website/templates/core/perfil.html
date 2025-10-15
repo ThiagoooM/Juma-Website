@@ -1,0 +1,1 @@
+{% extends 'core/base.html' %}{% block content %}<h2>Mi perfil</h2><form method='post'>{% csrf_token %}{{ form.as_p }}<button class='btn btn-primary'>Guardar</button></form>{% endblock %}
