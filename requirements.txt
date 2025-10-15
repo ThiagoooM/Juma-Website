@@ -18,9 +18,6 @@ crispy-bootstrap5==2024.2         # estilos Bootstrap 5 para formularios
 # --- Manejo de entornos y variables ---
 python-dotenv==1.0.1              # para gestionar variables .env (como SECRET_KEY, DEBUG, DB)
 
-# --- Base de datos (SQLite por defecto, pero listo para PostgreSQL si querés migrar) ---
-psycopg2-binary==2.9.9            # conector PostgreSQL (opcional, no necesario en SQLite)
-
 # --- Seguridad y autenticación avanzada ---
 django-allauth==0.63.3            # registro e inicio de sesión social (Google, GitHub, etc.)
 django-widget-tweaks==1.5.0       # personalizar inputs fácilmente en templates
